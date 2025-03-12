@@ -8,20 +8,19 @@ def load_data(path: str)-> pd.DataFrame:
     df = pd.read_csv(f'data/{path}')
     return df
 
-
 def split_train_test(df: pd.DataFrame)-> tuple:
     X_train = df[df['date'] == '2024-11'][Config.PREDICTOR] .values
     y_train = df[df['date'] == '2024-12'][Config.TARGET]    .values
     X_test  = df[df['date'] == '2024-12'][Config.PREDICTOR] .values
     y_test  = df[df['date'] == '2025-01'][Config.TARGET]    .values
+    X_train = sm.add_constant(X_train, has_constant = 'add')
+    X_test  = sm.add_constant(X_test,  has_constant = 'add')
 
     return (X_train, y_train, X_test, y_test)
 
-def regress_model(X_train: pd.DataFrame, y_train: pd.DataFrame, X_test: pd.DataFrame, y_test: pd.DataFrame)-> tuple:
-    X_train = sm.add_constant(X_train, has_constant = 'add') # (612, 11)
+def regress_model(X_train: pd.DataFrame, y_train: pd.DataFrame)-> tuple:
     beta_hat = np.linalg.inv(X_train.T @ X_train) @ X_train.T @ y_train # (11, 1)   
     y_hat = X_train @ beta_hat # (612, 1)
-
     return (beta_hat, y_hat)
 
 def calculate_RMSE(y_train: pd.DataFrame, y_hat: pd.DataFrame)-> float:
@@ -39,7 +38,7 @@ def error_of_leave_one_out_prediction(h_ii: np.ndarray):
     h_ii    = h_ii.reshape(-1, 1)  # (612, 1)
     LOO_errors = errors / (h_ii / (1 - h_ii)) # (612, 1)
     abs_LOO_errors = np.abs(LOO_errors) # (612, 1)
-    print(f'absolute LOO errors: {abs_LOO_errors}')
+    # print(f'absolute LOO errors: {abs_LOO_errors}')
     return abs_LOO_errors
  
 def influential_observations_report(h_ii: np.ndarray, abs_LOO_errors: np.ndarray)-> pd.DataFrame:
@@ -68,20 +67,52 @@ def influential_observations_report(h_ii: np.ndarray, abs_LOO_errors: np.ndarray
     return report_df
 
 def calc_out_sample_RMSE(X_test: np.ndarray, beta_hat: np.ndarray, y_test: np.ndarray)-> float:
-    X_test = sm.add_constant(X_test, has_constant = 'add')
     y_hat_test = X_test @ beta_hat
     RMSE_test = np.sqrt(np.mean((y_test - y_hat_test) ** 2))
     print(f'RMSE_test: {RMSE_test}')
     return RMSE_test
+
+def remove_observation_with_high_hii(h_ii: pd.DataFrame, X_train: pd.DataFrame, y_train: pd.DataFrame)-> tuple:
+    P = 11
+    N = 612
+    indices = np.where(h_ii > 2 * P / N)
+    X_train_filt = np.delete(X_train, indices, axis = 0)
+    y_train_filt = np.delete(y_train, indices, axis = 0)
+    return X_train_filt, y_train_filt
+
+def repeat_exercsies_1_3(X_train_filt):
+    beta_hat_filt, y_hat_filt   = regress_model(X_train_filt, y_train_filt)
+    RMSE_train_filt             = calculate_RMSE(y_train_filt, y_hat_filt)
+    H_filt, h_ii_filt           = calc_hat_matrix()
+    abs_LOO_errors_filt         = error_of_leave_one_out_prediction(h_ii_filt)
+    influential_observations_report(h_ii_filt, abs_LOO_errors_filt)
+    calc_out_sample_RMSE(X_test, beta_hat_filt, y_test)
+
+def remove_three_observation_with_largest_loo_error(h_ii: pd.DataFrame, X_train: pd.DataFrame, y_train: pd.DataFrame)-> tuple:
+    indices = np.argsort(abs_LOO_errors, axis = 0)[-3:]
+    X_train_filt = np.delete(X_train, indices, axis = 0)
+    y_train_filt = np.delete(y_train, indices, axis = 0)
+    return X_train_filt, y_train_filt
+
+def repeat_exercises_1_3_again(X_train_flit):
+    beta_hat_filt, y_hat_filt   = regress_model(X_train_filt, y_train_filt)
+    RMSE_train_filt             = calculate_RMSE(y_train_filt, y_hat_filt)
+    H_filt, h_ii_filt           = calc_hat_matrix()
+    abs_LOO_errors_filt         = error_of_leave_one_out_prediction(h_ii_filt)
+    influential_observations_report(h_ii_filt, abs_LOO_errors_filt)
+    calc_out_sample_RMSE(X_test, beta_hat_filt, y_test)
+
+
 
 
 if __name__ == '__main__':
 
     df = load_data('data_with_complete_dates.csv')
     X_train, y_train, X_test, y_test = split_train_test(df)
+    print(X_train.shape)
     
     # Exercise 1
-    beta_hat, y_hat = regress_model(X_train, y_train, X_test, y_test)
+    beta_hat, y_hat = regress_model(X_train, y_train)
     RMSE_train      = calculate_RMSE(y_train, y_hat)
     H, h_ii         = calc_hat_matrix()
     abs_LOO_errors  = error_of_leave_one_out_prediction(h_ii)
@@ -93,10 +124,12 @@ if __name__ == '__main__':
     calc_out_sample_RMSE(X_test, beta_hat, y_test)
 
     # Exercise 4
+    X_train_filt, y_train_filt = remove_observation_with_high_hii(h_ii, X_train, y_train)
+    repeat_exercsies_1_3(X_train_filt)
 
-
-
-
+    # Exercise 5
+    X_train_filt, y_train_filt = remove_three_observation_with_largest_loo_error(h_ii, X_train, y_train)
+    repeat_exercises_1_3_again(X_train_filt)
 
 
 
