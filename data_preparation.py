@@ -58,6 +58,7 @@ def preview_data(df = pd.DataFrame)-> pd.DataFrame:
 
 if __name__ == '__main__':
 
+    """
     # rename columns and convert from xlsx to csv
     for file_name, col in zip(['price', 'institution', 'factor'], [price_col, institution_col, factor_col]):
         rename_and_convert_to_csv(file_name, col)
@@ -76,4 +77,5 @@ if __name__ == '__main__':
 
     # preview data
     preview_data(pd.DataFrame(pd.read_csv('data/data_with_complete_dates.csv')))
+    """
     ...
