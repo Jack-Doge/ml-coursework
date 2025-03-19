@@ -3,6 +3,7 @@ import numpy as np
 from loguru import logger
 import statsmodels.api as sm
 from config import Config
+from itertools import repeat
 
 def load_data(path: str)-> pd.DataFrame:
     df = pd.read_csv(f'data/{path}')
@@ -102,11 +103,51 @@ def repeat_exercises_1_3_again(X_train_flit):
     influential_observations_report(h_ii_filt, abs_LOO_errors_filt)
     calc_out_sample_RMSE(X_test, beta_hat_filt, y_test)
 
+def normalize(X: np.ndarray)-> np.ndarray:
+    scaler = StandardScaler()
+    X_norm = scaler.fit_transform(X)
+    return X_norm
 
+def compute_rmse_after_pcr(X_train_scaled: np.ndarray, y_train: np.ndarray)-> int:
+
+    rmse_list = []
+    for K in repeat(1, 11):
+        pca = PCA(n_components = K)
+        X_train_pca = pca.fit_transform(X_train_scaled)
+        
+        model = LinearRegression()
+        model.fit(X_train_pca, y_train)
+
+        y_train_pred = model.predict(X_train_pca)
+        rmse = np.sqrt(mean_squared_error(y_train, y_train_pred))
+        rmse_list.append(rmse)
+    
+    best_k = np.argmin(rmse_list) + 1
+    return best_k
+
+def fit_test_data_and_find_the_best_k(X_train_scaled, y_train, X_test_scaled, y_test):
+
+    rmse_list = []
+    for K in repeat(1, 11):
+        pca = PCA(n_components = K)
+        X_train_pca = pca.fit_transform(X_train_scaled)
+        X_test_pca = pca.transform(X_test_scaled)
+
+        model = LinearRegression()
+        model.fit(X_train_pca, y_train)
+
+        y_test_pred = model.predict(X_test_pca)
+        rmse = np.sqrt(mean_squared_error(y_test, y_test_pred))
+        rmse_list.append(rmse)
+    
+    best_k = np.argmin(rmse_list) + 1
+    return best_k
 
 
 if __name__ == '__main__':
 
+
+    """ HW1 """
     df = load_data('data_with_complete_dates.csv')
     X_train, y_train, X_test, y_test = split_train_test(df)
     print(X_train.shape)
@@ -131,11 +172,21 @@ if __name__ == '__main__':
     X_train_filt, y_train_filt = remove_three_observation_with_largest_loo_error(h_ii, X_train, y_train)
     repeat_exercises_1_3_again(X_train_filt)
 
+    """ HW2 """
+    from sklearn.decomposition import PCA
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.metrics import mean_squared_error
+    from sklearn.linear_model import LinearRegression
 
-
-
-
-
+    # Exercise 1
+    X_train_scaled = normalize(X_train)
+    best_k = compute_rmse_after_pcr(X_train_scaled, y_train)
+    print(f'bset k in S_train: {best_k}')
+    
+    # Exercise 2
+    X_test_scaled = normalize(X_test)
+    best_k = fit_test_data_and_find_the_best_k(X_train_scaled, y_train, X_test_scaled, y_test)
+    print(f'bset k in S_test: {best_k}')
 
 
 
