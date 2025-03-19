@@ -130,4 +130,3 @@ if __name__ == '__main__':
     # Exercise 5
     X_train_filt, y_train_filt = remove_three_observation_with_largest_loo_error(h_ii, X_train, y_train)
     repeat_exercises_1_3_again(X_train_filt)
-
