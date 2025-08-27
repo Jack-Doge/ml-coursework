@@ -1,5 +1,4 @@
 class Config:
-
     PREDICTOR = ['volume_dollar',
                  'market_value', 
                  'pb', 
@@ -10,5 +9,4 @@ class Config:
                  'mkt_rp', 
                  'rf', 
                  'mkt_pf']
-    
     TARGET    = ['return']

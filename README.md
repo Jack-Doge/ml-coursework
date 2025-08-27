@@ -1,55 +1,60 @@
-# 📊 Taiwan Stock Prediction Using Ridge Regression & XGBoost
+# 📈 Taiwan Stock Return Prediction
 
-This repository contains the source code and result materials for a two-part final project focused on predicting Taiwan stock returns using both linear and non-linear models. The project involves portfolio construction, model evaluation, and feature importance analysis based on fundamental and market factors.
-
----
-
-## 📁 Project Structure
-
-- `part1/`: Code and materials for **Part I** – model construction, tuning, and baseline portfolio performance.
-- `part2/`: Code and materials for **Part II** – result analysis, model interpretation, and time-evolving feature importance visualization.
-- `report/`: PDF reports for both parts (not containing code).
+This project focuses on predicting Taiwan stock returns using various financial factors and machine learning models. It includes data preparation, model training (Ridge Regression, XGBoost), and result analysis.
 
 ---
 
-## 📌 Part I Summary
+## 📁 File Structure
 
-- **Data**: Monthly data from **2009/01 to 2025/02** for the top 500 Taiwan-listed companies.
-- **Features**: Includes firm-specific and market-level predictors, such as turnover, P/B, dividend yield, market risk premium, value, momentum, profitability, etc.
-- **Models**: Ridge Regression and XGBoost, tuned with hyperparameters using walk-forward validation.
-- **Output**:
-  - L/S portfolio returns.
-  - Mean and mean-volatility adjusted performance metrics.
-  - Top-3 features and partial dependence plots.
+- `config.py`: Defines global configurations, such as feature names and target variables.
+- `data_preparation.py`: Scripts for initial data cleaning, merging, and transformation from raw Excel files.
+- `data_processing.py`: Processes the raw data into a clean, usable format for modeling.
+- `ridge.py`: Implements a Ridge Regression model with a walk-forward validation approach to predict stock returns.
+- `xg.py`: Implements an XGBoost model using a similar walk-forward validation approach.
+- `summary.py`: Analyzes and visualizes the results from the Ridge and XGBoost models, comparing their performance.
+- `HW[1-3].py`: Scripts for specific homework assignments, exploring concepts like influential observations, Principal Component Regression (PCR), and Arbitrage Pricing Theory (APT).
+- `data/`: Contains all data, including raw, processed, and result files.
+- `summary/`: Contains saved plots from the analysis in `summary.py`.
 
 ---
 
-## 📌 Part II Summary
+## 🚀 How to Run
 
-- **Data & Methodology**: Continuation of Part I with expanded analysis.
-- **Key Insights**:
-  - Comparison to benchmarks and explanations for out/underperformance.
-  - Interpretation of top features during strong vs. weak periods.
-  - Visualization of **feature importance evolution over time** using SHAP/permutation-based heatmaps.
+1.  **Data Preparation**: The initial data preparation from raw `.xlsx` files is done in `data_preparation.py`. The main modeling scripts consume data that is already processed.
+
+2.  **Run Models**: Execute the regression and machine learning models. These scripts will generate result files in the `data/` directory.
+    ```bash
+    python ridge.py
+    python xg.py
+    ```
+
+3.  **Analyze Results**: Run the summary script to generate analysis plots and comparisons.
+    ```bash
+    python summary.py
+    ```
+
+4.  **Homework Scripts**: The `HW` scripts can be run individually to see the results of specific analyses.
+    ```bash
+    python HW1.py
+    python HW2.py
+    python HW3.py
+    ```
 
 ---
 
 ## 🔧 Technologies Used
 
-- Python 3.11
+- Python 3.9+
+- pandas
+- numpy
 - scikit-learn
 - XGBoost
-- SHAP
-- matplotlib / seaborn
-- pandas / NumPy
+- statsmodels
+- matplotlib
 
 ---
 
-## Contact
+## 👤 Author
 
-Author: **Jack Huang**  
-Email: `113352025@g.nccu.edu.tw`  
-Graduate Student, National Chengchi University, Department of Money & Banking
-
----
-
+- **Jack Huang**
+- `113352025@g.nccu.edu.tw`
